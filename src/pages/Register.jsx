@@ -1,0 +1,225 @@
+import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+
+const Register = () => {
+  const navigate = useNavigate();
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    studentId: '',
+    password: '',
+    confirmPassword: ''
+  });
+
+  const [message, setMessage] = useState({ type: '', text: '' });
+  const [strength, setStrength] = useState({ width: '0%', color: '', text: '' });
+
+  // Handle Input Changes
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+
+    if (name === 'password') {
+      checkPasswordStrength(value);
+    }
+  };
+
+  // Password Strength Logic
+  const checkPasswordStrength = (pass) => {
+    if (!pass) {
+      setStrength({ width: '0%', color: '', text: '' });
+      return;
+    }
+    
+    let score = 0;
+    if (pass.length > 6) score++;
+    if (/[A-Z]/.test(pass)) score++;
+    if (/[0-9]/.test(pass)) score++;
+    if (/[^A-Za-z0-9]/.test(pass)) score++;
+
+    switch (score) {
+      case 0:
+      case 1:
+        setStrength({ width: '25%', color: '#ff4d4d', text: 'Weak' });
+        break;
+      case 2:
+        setStrength({ width: '50%', color: '#ffa500', text: 'Fair' });
+        break;
+      case 3:
+        setStrength({ width: '75%', color: '#2ecc71', text: 'Good' });
+        break;
+      case 4:
+        setStrength({ width: '100%', color: '#27ae60', text: 'Strong' });
+        break;
+      default:
+        break;
+    }
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    setMessage({ type: '', text: '' });
+
+    // Validation
+    if (formData.password !== formData.confirmPassword) {
+      setMessage({ type: 'error', text: 'Passwords do not match!' });
+      return;
+    }
+
+    if (!formData.email.endsWith('@school.edu')) {
+      setMessage({ type: 'error', text: 'Please use your official @school.edu email.' });
+      return;
+    }
+
+    // Demo Success
+    setMessage({ type: 'success', text: '✓ Registration successful! Redirecting to login...' });
+    
+    setTimeout(() => {
+      navigate('/login');
+    }, 2000);
+  };
+
+  return (
+    <div className="auth-page">
+      <div className="auth-background">
+        <div className="gradient-orb orb-1"></div>
+        <div className="gradient-orb orb-2"></div>
+        <div className="gradient-orb orb-3"></div>
+      </div>
+
+      <div className="auth-container">
+        <div className="auth-card">
+          <div className="auth-header">
+            <div className="auth-icon">👤</div>
+            <h2>Create Account</h2>
+            <p>Join our school community and start reporting facility issues</p>
+          </div>
+
+          <div className="auth-body">
+            {message.text && (
+              <div className={`alert alert-${message.type}`}>
+                {message.text}
+              </div>
+            )}
+
+            <form id="registerForm" className="auth-form" onSubmit={handleSubmit}>
+              <div className="form-group">
+                <label htmlFor="name">
+                  <span className="label-icon">👤</span> Full Name
+                </label>
+                <input
+                  type="text"
+                  name="name"
+                  placeholder="Enter your full name"
+                  value={formData.name}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="email">
+                  <span className="label-icon">✉️</span> School Email
+                </label>
+                <input
+                  type="email"
+                  name="email"
+                  placeholder="your.name@school.edu"
+                  value={formData.email}
+                  onChange={handleChange}
+                  required
+                />
+                <small className="input-hint">Use your official school email address</small>
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="studentId">
+                  <span className="label-icon">🎓</span> Student ID
+                </label>
+                <input
+                  type="text"
+                  name="studentId"
+                  placeholder="e.g., 2024001234"
+                  value={formData.studentId}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="password">
+                  <span className="label-icon">🔒</span> Password
+                </label>
+                <input
+                  type="password"
+                  name="password"
+                  placeholder="Create a strong password"
+                  value={formData.password}
+                  onChange={handleChange}
+                  required
+                  minLength="6"
+                />
+                <small className="input-hint">Minimum 6 characters</small>
+
+                {/* Password Strength Indicator */}
+                <div className="password-strength" style={{ display: formData.password ? 'block' : 'none', marginTop: '8px' }}>
+                  <div className="strength-bar" style={{ height: '4px', background: '#eee', borderRadius: '2px' }}>
+                    <div 
+                      className="strength-fill" 
+                      style={{ 
+                        width: strength.width, 
+                        backgroundColor: strength.color,
+                        height: '100%',
+                        transition: 'all 0.3s ease'
+                      }}
+                    ></div>
+                  </div>
+                  <span className="strength-text" style={{ fontSize: '12px', color: strength.color }}>{strength.text}</span>
+                </div>
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="confirmPassword">
+                  <span className="label-icon">🔒</span> Confirm Password
+                </label>
+                <input
+                  type="password"
+                  name="confirmPassword"
+                  placeholder="Re-enter your password"
+                  value={formData.confirmPassword}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+
+              <div className="info-box">
+                <span className="info-icon">ℹ️</span>
+                <p>By registering, you agree to use this system responsibly.</p>
+              </div>
+
+              <button type="submit" className="btn-submit">Create Account</button>
+            </form>
+
+            <div className="auth-footer">
+              <p>Already have an account? <Link to="/login">Sign in here</Link></p>
+            </div>
+          </div>
+        </div>
+
+        <div className="features-mini">
+          <div className="feature-mini">
+            <span className="feature-mini-icon">✓</span>
+            <div>
+              <h4>Quick Registration</h4>
+              <p>Get started in less than a minute</p>
+            </div>
+          </div>
+          {/* ... other feature items ... */}
+        </div>
+        <Link to="/" className="back-link">← Back to Home</Link>
+      </div>
+    </div>
+  );
+};
+
+export default Register;
